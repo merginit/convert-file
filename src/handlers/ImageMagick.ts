@@ -7,6 +7,7 @@ import {
 } from "@imagemagick/magick-wasm";
 
 import mime from "mime";
+import normalizeMimeType from "../normalizeMimeType.ts";
 
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 
@@ -37,7 +38,7 @@ class ImageMagickHandler implements FormatHandler {
         name: format.description,
         format: formatName,
         extension: formatName,
-        mime: mimeType,
+        mime: normalizeMimeType(mimeType),
         from: format.supportsReading,
         to: format.supportsWriting,
         internal: format.format

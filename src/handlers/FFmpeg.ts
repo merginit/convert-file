@@ -2,7 +2,9 @@ import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import type { LogEvent } from "@ffmpeg/ffmpeg";
+
 import mime from "mime";
+import normalizeMimeType from "../normalizeMimeType.ts";
 
 class FFmpegHandler implements FormatHandler {
 
@@ -130,6 +132,7 @@ class FFmpegHandler implements FormatHandler {
           extension = format;
           mimeType = mime.getType(format) || ("video/" + format);
         }
+        mimeType = normalizeMimeType(mimeType);
 
         this.supportedFormats.push({
           name: description + (formats.length > 1 ? (" / " + format) : ""),

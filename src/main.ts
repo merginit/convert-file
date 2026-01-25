@@ -1,4 +1,5 @@
 import type { FileFormat, FileData, FormatHandler, ConvertPathNode } from "./FormatHandler.js";
+import normalizeMimeType from "./normalizeMimeType.js";
 import handlers from "./handlers";
 
 /** Files currently selected for conversion */
@@ -97,9 +98,8 @@ const fileSelectHandler = (event: Event) => {
     ${files.length > 1 ? `<br>... and ${files.length - 1} more` : ""}
   </h2>`;
 
-  let mimeType = files[0].type;
   // Common MIME type adjustments (to match "mime" library)
-  if (mimeType === "image/x-icon") mimeType = "image/vnd.microsoft.icon";
+  let mimeType = normalizeMimeType(files[0].type);
 
   // Search input formats by MIME type, or fall back to file extension.
   const fileExtension = files[0].name.split(".").pop();
