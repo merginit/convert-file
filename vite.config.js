@@ -13,10 +13,6 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: "node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.*",
-          dest: "wasm"
-        },
-        {
           src: "node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
           dest: "wasm"
         }
