@@ -13,6 +13,10 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
+          src: "style.css",
+          dest: "."
+        },
+        {
           src: "node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
           dest: "wasm"
         }
