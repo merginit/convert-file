@@ -3,50 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="preconnect" href="https://api.fonts.coollabs.io" crossorigin>
+  <link href="https://api.fonts.coollabs.io/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <title>Convert to it!</title>
+  <title>Convert: File conversion tool</title>
 </head>
 <body>
-
-  <input id="file-input" type="file">
-
-  <div id="file-area">
-    <h2>Click to add your file</h2>
-    <p id="drop-hint-text">or drag and drop it here</p>
-  </div>
-  <div id="side-panel">
-    <button id="mode-button">Advanced mode</button>
-  </div>
-
-  <div id="format-containers">
-
-    <div id="from-container" class="format-container">
-      <h2>Convert from:</h2>
-      <input type="text" id="search-from" class="search" placeholder="Search">
-      <div id="from-list" class="format-list">
-
-      </div>
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">Convert</h1>
+      <button id="mode-button" class="mode-toggle">
+        <span class="mode-label">Advanced</span>
+      </button>
     </div>
+  </header>
 
-    <div id="to-container" class="format-container">
-      <h2>Convert to:</h2>
-      <input type="text" id="search-to" class="search" placeholder="Search">
-      <div id="to-list" class="format-list">
-
+  <main class="main">
+    <input id="file-input" type="file" multiple>
+    
+    <section id="drop-zone" class="drop-zone">
+      <div class="drop-content">
+        <p class="drop-text">Drop files to convert</p>
+        <p class="drop-hint">or click to browse</p>
       </div>
-    </div>
+    </section>
 
-  </div>
+    <section id="conversion-panel" class="conversion-panel hidden">
+      <div class="panel-layout">
+        <div class="file-section">
+          <span id="file-name" class="file-name"></span>
+          <button id="change-file-btn" class="link-button">Change</button>
+        </div>
 
-  <button id="convert-button" class="disabled">Convert</button>
+        <div class="formats-section">
+          <div class="format-group">
+            <label class="format-label">From</label>
+            <input type="text" id="search-from" class="format-search" placeholder="Search formats" autocomplete="off">
+            <div id="from-list" class="format-list"></div>
+          </div>
 
-  <div id="popup-bg"></div>
-  <div id="popup">
-    <h2>Loading tools...</h2>
+          <div class="format-divider"></div>
+
+          <div class="format-group">
+            <label class="format-label">To</label>
+            <input type="text" id="search-to" class="format-search" placeholder="Search formats" autocomplete="off">
+            <div id="to-list" class="format-list"></div>
+          </div>
+        </div>
+
+        <button id="convert-button" class="convert-button" disabled>
+          Convert
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <div id="popup-bg" class="popup-backdrop"></div>
+  <div id="popup" class="popup">
+    <p class="popup-message">Loading...</p>
   </div>
 
   <script type="module" src="src/main.ts"></script>
-
 </body>
 </html>

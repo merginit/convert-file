@@ -5,6 +5,7 @@ declare global {
     supportedFormatCache: Map<string, FileFormat[]>;
     printSupportedFormatCache: () => string;
     showPopup: (html: string) => void;
+    showResultPopup: (html: string) => void;
     hidePopup: () => void;
   }
 }

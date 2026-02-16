@@ -14,7 +14,10 @@ let simpleMode: boolean = true;
 
 const ui = {
   fileInput: document.querySelector("#file-input") as HTMLInputElement,
-  fileSelectArea: document.querySelector("#file-area") as HTMLDivElement,
+  dropZone: document.querySelector("#drop-zone") as HTMLElement,
+  conversionPanel: document.querySelector("#conversion-panel") as HTMLElement,
+  changeFileBtn: document.querySelector("#change-file-btn") as HTMLButtonElement,
+  fileName: document.querySelector("#file-name") as HTMLElement,
   convertButton: document.querySelector("#convert-button") as HTMLButtonElement,
   modeToggleButton: document.querySelector("#mode-button") as HTMLButtonElement,
   inputList: document.querySelector("#from-list") as HTMLDivElement,
@@ -26,7 +29,35 @@ const ui = {
 };
 
 /**
- * Filters a list of butttons to exclude those not matching a substring.
+ * Show the conversion panel and hide the drop zone
+ */
+const showConversionPanel = () => {
+  ui.dropZone.classList.add("hidden");
+  ui.conversionPanel.classList.remove("hidden");
+};
+
+/**
+ * Show the drop zone and hide the conversion panel
+ */
+const showDropZone = () => {
+  selectedFiles = [];
+  ui.conversionPanel.classList.add("hidden");
+  ui.dropZone.classList.remove("hidden");
+  ui.convertButton.disabled = true;
+  
+  // Clear selections
+  const selected = document.querySelectorAll(".format-list button.selected");
+  selected.forEach(btn => btn.classList.remove("selected"));
+  ui.inputSearch.value = "";
+  ui.outputSearch.value = "";
+  
+  // Reset filter
+  filterButtonList(ui.inputList, "");
+  filterButtonList(ui.outputList, "");
+};
+
+/**
+ * Filters a list of buttons to exclude those not matching a substring.
  * @param list Button list (div) to filter.
  * @param string Substring for which to search.
  */
@@ -39,14 +70,14 @@ const filterButtonList = (list: HTMLDivElement, string: string) => {
       const format = allOptions[parseInt(formatIndex)];
       hasExtension = format?.format.extension.toLowerCase().includes(string);
     }
-    const hasText = button.textContent.toLowerCase().includes(string);
+    const hasText = button.textContent?.toLowerCase().includes(string) || false;
     if (!hasExtension && !hasText) {
       button.style.display = "none";
     } else {
       button.style.display = "";
     }
   }
-}
+};
 
 /**
  * Handles search box input by filtering its parent container.
@@ -68,8 +99,15 @@ ui.inputSearch.oninput = searchHandler;
 ui.outputSearch.oninput = searchHandler;
 
 // Map clicks in the file selection area to the file input element
-ui.fileSelectArea.onclick = () => {
+ui.dropZone.onclick = (e) => {
+  // Don't trigger if clicking the change file button
+  if (e.target === ui.changeFileBtn) return;
   ui.fileInput.click();
+};
+
+ui.changeFileBtn.onclick = (e) => {
+  e.stopPropagation();
+  showDropZone();
 };
 
 /**
@@ -103,10 +141,14 @@ const fileSelectHandler = (event: Event) => {
   files.sort((a, b) => a.name === b.name ? 0 : (a.name < b.name ? -1 : 1));
   selectedFiles = files;
 
-  ui.fileSelectArea.innerHTML = `<h2>
-    ${files[0].name}
-    ${files.length > 1 ? `<br>... and ${files.length - 1} more` : ""}
-  </h2>`;
+  // Update file info display
+  if (files.length > 1) {
+    ui.fileName.textContent = `${files[0].name} (+${files.length - 1} more)`;
+  } else {
+    ui.fileName.textContent = files[0].name;
+  }
+
+  showConversionPanel();
 
   // Common MIME type adjustments (to match "mime" library)
   let mimeType = normalizeMimeType(files[0].type);
@@ -152,22 +194,56 @@ window.addEventListener("drop", fileSelectHandler);
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("paste", fileSelectHandler);
 
+// Drag enter/leave effects for drop zone
+ui.dropZone.addEventListener("dragenter", () => {
+  ui.dropZone.classList.add("dragover");
+});
+
+ui.dropZone.addEventListener("dragleave", (e) => {
+  if (e.relatedTarget && !ui.dropZone.contains(e.relatedTarget as Node)) {
+    ui.dropZone.classList.remove("dragover");
+  }
+});
+
+window.addEventListener("drop", () => {
+  ui.dropZone.classList.remove("dragover");
+});
+
 /**
  * Display an on-screen popup.
  * @param html HTML content of the popup box.
  */
 window.showPopup = function (html: string) {
-  ui.popupBox.innerHTML = html;
-  ui.popupBox.style.display = "block";
-  ui.popupBackground.style.display = "block";
-}
+  ui.popupBox.innerHTML = `
+    <p class="popup-message">
+      <span class="popup-spinner"></span>
+      ${html}
+    </p>
+  `;
+  ui.popupBox.classList.add("show");
+  ui.popupBackground.classList.add("show");
+};
+
+/**
+ * Display a success/error popup with a button.
+ * @param html HTML content of the popup box.
+ */
+window.showResultPopup = function (html: string) {
+  ui.popupBox.innerHTML = `
+    <p class="popup-message">${html}</p>
+    <button onclick="window.hidePopup()">OK</button>
+  `;
+  ui.popupBox.classList.add("show");
+  ui.popupBackground.classList.add("show");
+};
+
 /**
  * Hide the on-screen popup.
  */
 window.hidePopup = function () {
-  ui.popupBox.style.display = "none";
-  ui.popupBackground.style.display = "none";
-}
+  ui.popupBox.classList.remove("show");
+  ui.popupBackground.classList.remove("show");
+};
 
 const allOptions: Array<{ format: FileFormat, handler: FormatHandler }> = [];
 
@@ -179,7 +255,7 @@ window.printSupportedFormatCache = () => {
     entries.push(entry);
   }
   return JSON.stringify(entries, null, 2);
-}
+};
 
 async function buildOptionList () {
 
@@ -233,9 +309,9 @@ async function buildOptionList () {
           .filter((_, i) => i % 2 === 0)
           .filter(c => c != "")
           .join(" ");
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${cleanName} (${format.mime})`));
+        newOption.appendChild(document.createTextNode(`${formatDescriptor}: ${cleanName}`));
       } else {
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`));
+        newOption.appendChild(document.createTextNode(`${formatDescriptor}: ${format.name} (${handler.name})`));
       }
 
       const clickHandler = (event: Event) => {
@@ -246,9 +322,9 @@ async function buildOptionList () {
         event.target.className = "selected";
         const allSelected = document.getElementsByClassName("selected");
         if (allSelected.length === 2) {
-          ui.convertButton.className = "";
+          ui.convertButton.disabled = false;
         } else {
-          ui.convertButton.className = "disabled";
+          ui.convertButton.disabled = true;
         }
       };
 
@@ -290,12 +366,13 @@ async function buildOptionList () {
 
 ui.modeToggleButton.addEventListener("click", () => {
   simpleMode = !simpleMode;
+  const btnText = ui.modeToggleButton.querySelector(".mode-label");
   if (simpleMode) {
-    ui.modeToggleButton.textContent = "Advanced mode";
-    document.body.style.setProperty("--highlight-color", "#1C77FF");
+    if (btnText) btnText.textContent = "Advanced";
+    document.body.classList.remove("advanced-mode");
   } else {
-    ui.modeToggleButton.textContent = "Simple mode";
-    document.body.style.setProperty("--highlight-color", "#FF6F1C");
+    if (btnText) btnText.textContent = "Simple";
+    document.body.classList.add("advanced-mode");
   }
   buildOptionList();
 });
@@ -307,8 +384,7 @@ const convertPathCache: Array<{
 
 async function attemptConvertPath (files: FileData[], path: ConvertPathNode[]) {
 
-  ui.popupBox.innerHTML = `<h2>Finding conversion route...</h2>
-    <p>Trying <b>${path.map(c => c.format.format).join(" → ")}</b>...</p>`;
+  window.showPopup(`Finding conversion route: ${path.map(c => c.format.format.toUpperCase()).join(" → ")}`);
 
   const cacheLast = convertPathCache.at(-1);
   if (cacheLast) files = cacheLast.files;
@@ -354,7 +430,7 @@ async function buildConvertPath (
     if (!path) continue;
     if (path.length > 5) continue;
 
-    for (let i = 1; i < path.length; i ++) {
+    for (let i = 1; i < path.length; i++) {
       if (path[i] !== convertPathCache[i]?.node) {
         convertPathCache.length = i - 1;
         break;
@@ -447,7 +523,7 @@ ui.convertButton.onclick = async function () {
       inputFileData.push({ name: inputFile.name, bytes: inputBytes });
     }
 
-    window.showPopup("<h2>Finding conversion route...</h2>");
+    window.showPopup("Finding conversion route...");
 
     const output = await buildConvertPath(inputFileData, outputOption, [[inputOption]]);
     if (!output) {
@@ -460,10 +536,8 @@ ui.convertButton.onclick = async function () {
       downloadFile(file.bytes, file.name, outputFormat.mime);
     }
 
-    window.showPopup(
-      `<h2>Converted ${inputOption.format.format} to ${outputOption.format.format}!</h2>` +
-      `<p>Path used: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
-      `<button onclick="window.hidePopup()">OK</button>`
+    window.showResultPopup(
+      `Converted ${inputOption.format.format.toUpperCase()} to ${outputOption.format.format.toUpperCase()} via ${output.path.map(c => c.format.format.toUpperCase()).join(" → ")}`
     );
 
   } catch (e) {
@@ -475,3 +549,5 @@ ui.convertButton.onclick = async function () {
   }
 
 };
+
+window.showPopup("Loading conversion tools...");
