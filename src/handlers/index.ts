@@ -13,18 +13,18 @@ import sppdHandler from "./sppd.ts";
 import threejsHandler from "./threejs.ts";
 import markdownHandler from "./markdown.ts";
 
-const handlers: FormatHandler[] = [
-  new canvasToBlobHandler(),
-  new meydaHandler(),
-  new FFmpegHandler(),
-  new pdftoimgHandler(),
-  new ImageMagickHandler(),
-  new renameHandler(),
-  new envelopeHandler(),
-  new svgForeignObjectHandler(),
-  new qoiFuHandler(),
-  new sppdHandler(),
-  new threejsHandler(),
-  new markdownHandler(),
-];
+const handlers: FormatHandler[] = [];
+try { handlers.push(new canvasToBlobHandler()) } catch (_) { };
+try { handlers.push(new meydaHandler()) } catch (_) { };
+try { handlers.push(new FFmpegHandler()) } catch (_) { };
+try { handlers.push(new pdftoimgHandler()) } catch (_) { };
+try { handlers.push(new ImageMagickHandler()) } catch (_) { };
+try { handlers.push(new renameHandler()) } catch (_) { };
+try { handlers.push(new envelopeHandler()) } catch (_) { };
+try { handlers.push(new svgForeignObjectHandler()) } catch (_) { };
+try { handlers.push(new qoiFuHandler()) } catch (_) { };
+try { handlers.push(new sppdHandler()) } catch (_) { };
+try { handlers.push(new threejsHandler()) } catch (_) { };
+try { handlers.push(new markdownHandler()) } catch (_) { };
+
 export default handlers;
