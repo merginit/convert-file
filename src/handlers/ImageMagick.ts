@@ -26,9 +26,16 @@ class ImageMagickHandler implements FormatHandler {
 
     await initializeImageMagick(wasmBytes);
 
+    // Filter out format variants and duplicates
+    const seenFormats = new Set<string>();
+    const formatVariants = ["bmp2", "bmp3", "wbmp", "ptif", "tiff64", "ycbcr", "dib"];
+
     Magick.supportedFormats.forEach(format => {
       const formatName = format.format.toLowerCase();
       if (formatName === "apng") return;
+      if (formatVariants.includes(formatName)) return;
+      if (seenFormats.has(formatName)) return;
+
       const mimeType = format.mimeType || mime.getType(formatName);
       if (
         !mimeType
@@ -36,6 +43,8 @@ class ImageMagickHandler implements FormatHandler {
         || mimeType.startsWith("video/")
         || mimeType === "application/json"
       ) return;
+
+      seenFormats.add(formatName);
       this.supportedFormats.push({
         name: format.description,
         format: formatName,

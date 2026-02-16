@@ -3,6 +3,7 @@ import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
 class threejsHandler implements FormatHandler {
 
@@ -16,6 +17,15 @@ class threejsHandler implements FormatHandler {
       from: true,
       to: false,
       internal: "glb"
+    },
+    {
+      name: "Wavefront OBJ",
+      format: "obj",
+      extension: "obj",
+      mime: "model/obj",
+      from: true,
+      to: false,
+      internal: "obj"
     },
     {
       name: "Portable Network Graphics",
@@ -58,7 +68,7 @@ class threejsHandler implements FormatHandler {
 
   async doConvert (
     inputFiles: FileData[],
-    _inputFormat: FileFormat,
+    inputFormat: FileFormat,
     outputFormat: FileFormat
   ): Promise<FileData[]> {
     const outputFiles: FileData[] = [];
@@ -68,17 +78,29 @@ class threejsHandler implements FormatHandler {
       const blob = new Blob([inputFile.bytes as BlobPart]);
       const url = URL.createObjectURL(blob);
 
-      const gltf: GLTF = await new Promise((resolve, reject) => {
-        const loader = new GLTFLoader();
-        loader.load(url, resolve, undefined, reject);
-      });
+      let scene: THREE.Group | THREE.Scene;
 
-      const bbox = new THREE.Box3().setFromObject(gltf.scene);
+      if (inputFormat.internal === "glb") {
+        const gltf: GLTF = await new Promise((resolve, reject) => {
+          const loader = new GLTFLoader();
+          loader.load(url, resolve, undefined, reject);
+        });
+        scene = gltf.scene;
+      } else if (inputFormat.internal === "obj") {
+        scene = await new Promise((resolve, reject) => {
+          const loader = new OBJLoader();
+          loader.load(url, resolve, undefined, reject);
+        });
+      } else {
+        throw "Invalid input format.";
+      }
+
+      const bbox = new THREE.Box3().setFromObject(scene);
       this.camera.position.z = bbox.max.z * 2;
 
-      this.scene.add(gltf.scene);
+      this.scene.add(scene);
       this.renderer.render(this.scene, this.camera);
-      this.scene.remove(gltf.scene);
+      this.scene.remove(scene);
 
       const bytes: Uint8Array = await new Promise((resolve, reject) => {
         this.renderer.domElement.toBlob((blob) => {

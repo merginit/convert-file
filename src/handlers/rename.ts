@@ -6,15 +6,6 @@ class renameHandler implements FormatHandler {
 
   public supportedFormats: FileFormat[] = [
     {
-      name: "ZIP Archive",
-      format: "zip",
-      extension: "zip",
-      mime: "application/zip",
-      from: false,
-      to: true,
-      internal: "zip"
-    },
-    {
       name: "Microsoft Office 365 Word Document",
       format: "docx",
       extension: "docx",
@@ -87,15 +78,6 @@ class renameHandler implements FormatHandler {
       internal: "love"
     },
     {
-      name: "LÖVE Game Package",
-      format: "love",
-      extension: "love",
-      mime: "application/zip",
-      from: true,
-      to: false,
-      internal: "love"
-    },
-    {
       name: "osu! Beatmap",
       format: "osz",
       extension: "osz",
@@ -141,11 +123,9 @@ class renameHandler implements FormatHandler {
 
   async doConvert (
     inputFiles: FileData[],
-    inputFormat: FileFormat,
+    _inputFormat: FileFormat,
     outputFormat: FileFormat
   ): Promise<FileData[]> {
-
-    if (inputFormat.internal !== "zip") throw "Invalid input format.";
 
     return inputFiles.map(file => {
       file.name = file.name.split(".")[0] + "." + outputFormat.extension;
