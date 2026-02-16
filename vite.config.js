@@ -8,7 +8,7 @@ export default defineConfig({
       "@ffmpeg/ffmpeg",
     ]
   },
-  base: "/convert/",
+  base: "/",
   plugins: [
     viteStaticCopy({
       targets: [
