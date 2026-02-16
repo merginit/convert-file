@@ -11,6 +11,7 @@ import svgForeignObjectHandler from "./svgForeignObject.ts";
 import qoiFuHandler from "./qoi-fu.ts";
 import sppdHandler from "./sppd.ts";
 import threejsHandler from "./threejs.ts";
+import markdownHandler from "./markdown.ts";
 
 const handlers: FormatHandler[] = [
   new canvasToBlobHandler(),
@@ -24,5 +25,6 @@ const handlers: FormatHandler[] = [
   new qoiFuHandler(),
   new sppdHandler(),
   new threejsHandler(),
+  new markdownHandler(),
 ];
 export default handlers;
