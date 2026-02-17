@@ -15,6 +15,8 @@ import markdownHandler from "./markdown.ts";
 import jsonHandler from "./json.ts";
 import archiveHandler from "./archive.ts";
 import ebookHandler from "./ebook.ts";
+import psdHandler from "./psd.ts";
+import rawHandler from "./raw.ts";
 
 const handlers: FormatHandler[] = [];
 try { handlers.push(new canvasToBlobHandler()) } catch (_) { };
@@ -32,5 +34,7 @@ try { handlers.push(new markdownHandler()) } catch (_) { };
 try { handlers.push(new jsonHandler()) } catch (_) { };
 try { handlers.push(new archiveHandler()) } catch (_) { };
 try { handlers.push(new ebookHandler()) } catch (_) { };
+try { handlers.push(new psdHandler()) } catch (_) { };
+try { handlers.push(new rawHandler()) } catch (_) { };
 
 export default handlers;
