@@ -14,6 +14,7 @@ import threejsHandler from "./threejs.ts";
 import markdownHandler from "./markdown.ts";
 import jsonHandler from "./json.ts";
 import archiveHandler from "./archive.ts";
+import ebookHandler from "./ebook.ts";
 
 const handlers: FormatHandler[] = [];
 try { handlers.push(new canvasToBlobHandler()) } catch (_) { };
@@ -30,5 +31,6 @@ try { handlers.push(new threejsHandler()) } catch (_) { };
 try { handlers.push(new markdownHandler()) } catch (_) { };
 try { handlers.push(new jsonHandler()) } catch (_) { };
 try { handlers.push(new archiveHandler()) } catch (_) { };
+try { handlers.push(new ebookHandler()) } catch (_) { };
 
 export default handlers;
