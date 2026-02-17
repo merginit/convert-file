@@ -4,6 +4,9 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { STLLoader } from "three/addons/loaders/STLLoader.js";
+import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
 
 class threejsHandler implements FormatHandler {
 
@@ -26,6 +29,33 @@ class threejsHandler implements FormatHandler {
       from: true,
       to: false,
       internal: "obj"
+    },
+    {
+      name: "Autodesk FBX",
+      format: "fbx",
+      extension: "fbx",
+      mime: "application/octet-stream",
+      from: true,
+      to: false,
+      internal: "fbx"
+    },
+    {
+      name: "Stereolithography",
+      format: "stl",
+      extension: "stl",
+      mime: "model/stl",
+      from: true,
+      to: false,
+      internal: "stl"
+    },
+    {
+      name: "Polygon File Format",
+      format: "ply",
+      extension: "ply",
+      mime: "application/ply",
+      from: true,
+      to: false,
+      internal: "ply"
     },
     {
       name: "Portable Network Graphics",
@@ -91,6 +121,29 @@ class threejsHandler implements FormatHandler {
           const loader = new OBJLoader();
           loader.load(url, resolve, undefined, reject);
         });
+      } else if (inputFormat.internal === "fbx") {
+        scene = await new Promise((resolve, reject) => {
+          const loader = new FBXLoader();
+          loader.load(url, resolve, undefined, reject);
+        });
+      } else if (inputFormat.internal === "stl") {
+        const geometry = await new Promise<THREE.BufferGeometry>((resolve, reject) => {
+          const loader = new STLLoader();
+          loader.load(url, resolve, undefined, reject);
+        });
+        const material = new THREE.MeshNormalMaterial();
+        const mesh = new THREE.Mesh(geometry, material);
+        scene = new THREE.Group();
+        scene.add(mesh);
+      } else if (inputFormat.internal === "ply") {
+        const geometry = await new Promise<THREE.BufferGeometry>((resolve, reject) => {
+          const loader = new PLYLoader();
+          loader.load(url, resolve, undefined, reject);
+        });
+        const material = new THREE.MeshNormalMaterial();
+        const mesh = new THREE.Mesh(geometry, material);
+        scene = new THREE.Group();
+        scene.add(mesh);
       } else {
         throw "Invalid input format.";
       }
